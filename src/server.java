@@ -105,8 +105,8 @@ public class server {
                 String name;
                 int trials = 50;
                 String s  = "FromServer:SUBMIT_USERNAME:"
-                        + "tries left:" + trials;
-                out.println(s);                    
+                        + "tries left:";
+                out.println(s + trials);                    
                 while(trials > 0) {
                     trials--;
                     name = in.readLine();
@@ -115,7 +115,7 @@ public class server {
                                 || name.equals("")
                                 || name.equals(" ")
                                 || containsName(name)) {                            
-                        out.println(s);                        
+                        out.println(s + trials);                        
                     } else {
                         addClient(name, out);
                         clientUserName = name;
@@ -137,7 +137,7 @@ public class server {
                         // broadcast to all register clients
                         ArrayList<PrintStream> l = getWriterList();
                         for (PrintStream w : l) {
-                            if (w != out) w.println(line);
+                            if (w != out) w.println(clientUserName + ":" + line);
                         }
                     }
                 }

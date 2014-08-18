@@ -1,0 +1,397 @@
+From 4071b9c7dbb9f3f5b178c2244f9dcc2c1a1a5470 Mon Sep 17 00:00:00 2001
+From: saikatroyc <rychwdh2@illinois.edu>
+Date: Mon, 18 Aug 2014 00:03:13 -0500
+Subject: [PATCH] This is ChatServer v1.0
+
+1. support multiple client connect
+2. requests username from a connected client
+3. starts a simple chat session
+4. broadcast user chat to all connected users
+5. EXIT_CLIENT command to kick a user out of chat session.
+
+Signed-off-by: saikatroyc <rychwdh2@illinois.edu>
+---
+ .classpath                           |   6 ++
+ .project                             |  17 ++++
+ .settings/org.eclipse.jdt.core.prefs |  11 +++
+ bin/.server.java.swp                 | Bin 0 -> 16384 bytes
+ bin/server$ClientHandler.class       | Bin 0 -> 3725 bytes
+ bin/server.class                     | Bin 0 -> 3292 bytes
+ src/server.java                      | 163 +++++++++++++++++++++++++++++++++++
+ 7 files changed, 197 insertions(+)
+ create mode 100644 .classpath
+ create mode 100644 .project
+ create mode 100644 .settings/org.eclipse.jdt.core.prefs
+ create mode 100644 bin/.server.java.swp
+ create mode 100644 bin/server$ClientHandler.class
+ create mode 100644 bin/server.class
+ create mode 100644 src/server.java
+
+diff --git a/.classpath b/.classpath
+new file mode 100644
+index 0000000..fceb480
+--- /dev/null
++++ b/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="src" path="src"/>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
++	<classpathentry kind="output" path="bin"/>
++</classpath>
+diff --git a/.project b/.project
+new file mode 100644
+index 0000000..8e6be6e
+--- /dev/null
++++ b/.project
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>ChatServer</name>
++	<comment></comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
++	</natures>
++</projectDescription>
+diff --git a/.settings/org.eclipse.jdt.core.prefs b/.settings/org.eclipse.jdt.core.prefs
+new file mode 100644
+index 0000000..3a21537
+--- /dev/null
++++ b/.settings/org.eclipse.jdt.core.prefs
+@@ -0,0 +1,11 @@
++eclipse.preferences.version=1
++org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
++org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.8
++org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
++org.eclipse.jdt.core.compiler.compliance=1.8
++org.eclipse.jdt.core.compiler.debug.lineNumber=generate
++org.eclipse.jdt.core.compiler.debug.localVariable=generate
++org.eclipse.jdt.core.compiler.debug.sourceFile=generate
++org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
++org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
++org.eclipse.jdt.core.compiler.source=1.8
+diff --git a/bin/.server.java.swp b/bin/.server.java.swp
+new file mode 100644
+index 0000000000000000000000000000000000000000..4842036cdac62368e82f55914b55e9b347b33f67
+GIT binary patch
+literal 16384
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/bin/server$ClientHandler.class b/bin/server$ClientHandler.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..95d6f2ccbfed78ec1f74c643a11327b13ae65805
+GIT binary patch
+literal 3725
+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
+Z57-CX|AJf&yoq1(?Uue0N54YFe*hl8%0>VH
+
+literal 0
+HcmV?d00001
+
+diff --git a/bin/server.class b/bin/server.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..86551b92601941439fb56a1bd73a656abb26c553
+GIT binary patch
+literal 3292
+zcmbtWSyLNV7XBK6TF7k!0)q))6wD+@5Fn1TVtZ`k4O=X+Y#bbCX^S?rExMIfW3Zi>
+zaWebD%w)FAc(Oe5l7|FW;UrW|rouz2@)z<8@|NdRD#~|mx3Gm>sZ>QO>2Bwo`<?H6
+z_jZ5&?Z^KEum|tzsL~KETHY1Q(^0LV{*rmc9LSr_%)t1COIFU;P+f36Hrj}WEwgUX
+zH>amPt60>K$lNi``kw8~3~4ZeU|BbJ*`ilVVB=W+KvwM%EYL8X%iEUYXY3-)wg+bO
+zzMUU9=y~Q<nWj-~)}C=pf8Mh+r0!?4_g)P9>8CGvwr_a^+4ntOwmUFE*gnBq=G>4t
+zR_6)4GPQsQuEq8evSa)EHAH$+lQbT7r!5^V8X6T7mGI+eMyr7b&_s&&D#u!AXg9D0
+zhV*tCsDlwl1g$cB&_Dwc8tO8(V~x$vU9h~<=7l^nPh{MjnV&R0TgKsJwLfb!zgQ+9
+zT*zW&h83wA(mnSQ6U=N%IyEUcQwGxLWnK)yYTWG{rk^^;d>wO+aI}Suf^7<>VQbbm
+zbC*ZWf<md|(F#cgD$(&+nXyWL9gmk6lmbuBdhS9%f#F$m?iDLYPY^$4;Aue|4HhW8
+zoa^|e?G(op$ch|7b*9dV=RO1b#WPlRAnF;*KdTfI$g!p8zG5TC{r6u9WmuVx5>#D5
+z6c*r?;I%l6qdJaM@^ZE4TXP1Ep`SHy=lvLX+S>B8Pr4VAo;Aas<yq57Dv*b!_)HwT
+zane8rqZGT^BJXS}Tsdh~;Bf;Jc$OtB+Sgb@>USiDtcDtEuHau4TFw}l#97iJ2gmeX
+zPeXG>vLoUA&=ySLc^wo);*RXgs|L>F1(Axi$aCFPj&RqFqWoVn@G?wdpEZkP%9M~8
+zF(&6^f)|dQh-m{gh%(q5>nd=bzgN_vUk$ScE}%)rC32uJZN6~gu#uO;ILB~3BdJM=
+z?;5B@T*oWCr#4?@hvx14wB^OXGu9Fuu_W(4&u0-#KPh)2i%`J41Ra&$f`LU`r6SEj
+z!E$(v+PTj?fWx>$;&I);tN0m{_T8XZn+Xd`7{f0#bcG-mOxx#Go4n|HNyl19QpFDM
+zY1?&*I$mRhz^*%x+;P*H&Rd?O|4ReE!mkBiE@u^3oW^o-6j|!RCafFyt)%oj!4jaq
+zYgyR7fj=1dqugpWijX*#@E09_E+1VUf|2nfi?Rnn8ThN12FE~M4yQdcXT|V04GmfK
+zNJv_XDy9DZe!=+<1OHUfb9uK&tyY`f42#fspW^c_qCxoZsN8o*$D4e}WZii$XC1ZW
+z8r>2w(=VmweKA7byy3iAELse|wSq4^NO?r~jEo{C8e|X9*$02rjB0s}(`qaGRoKRP
+zUgjI)dX9OUbFG%WMl^9{J4eT8E1%9aG*8{ej$3Hk=yj|i!nw{{NPa+*Ds=IGn}Si#
+zEgKjlfn90^495pc7<7QG#`&5wz3;e2)uf?Z1Q`v`ji0cM;UPTC8A0?0H<C;{SCE_<
+z{d5Iw=~eWcT|q~$w0-N#i1w|2@&V1F*nu{hwxL6{5rwdsVZl&QULxDj!vF2qiB`33
+zvr4xUecVz$op=QO+<1Wf9jGcXOhm_^j@>#zXgc<MO^+C!_<nd#hVY*J!SLD%uY>S*
+z5?(w1lRpaHGZ+flTO?emXlwd2)I{DB4l^N#dwbX4>s|kZ%LW-~rcpC<mNwumfok@<
+z2y7QEy1BATfeK318geE~HKHn7qP(gURRK>V>8Cir;DP=Qs#>1sSn6CSI8G8rM|%DJ
+zw89XTw+=2DBthB$L!hn{F{C-0Qu|9fvTGf*5+_-djU5kdNbU>nB&r!N?=+k^zKRo6
+z&nm`lV%rLa6Q?+_jEB|S>Ct60^?iirH2fcf87@;@Cpht<hMT1?)1op04ODg<CmH%A
+zMpYXiO{+sUK%|4r;8E&qH`VkQ`P)OaJdS;Aj}rG7Ukl`n2#Zhf$cpj;z4aja4Z4_3
+ziD#0ki*R)cs4t0y3~@NrUtAt0VS#%Up*;KzgHPW=?#}6olL2tsDBmVzLmAb=!o|Q*
+zJJ0e;fv<mvnKjr`E6Cl(<y&x=`x**U3GX(1POjq0Dy}K+h7&($yM`Myc2@EFZTw~x
+zzh5qWl_6Pw5=!4tc3k`WGP=he;p{TnM>ns;)Jh-OtY%un{4Vk7Kgn#DI6e-OurBfW
+zQ&i(Fj>f1l;1E}jpq@PT@S+;T2^_!(y)%4g8Kd6>zo!@{i*q=`DC6X5f{{)!Ru(?z
+z7I7BW@SGwf9i)$c;Z4Rq%+bH`AChw}>_zAi%te&mdZ7=V(y?@gzhkUKi8mh0bdzP;
+fBL!NjF43Evn+#Wl|EmAD@HSg{1-QZAJE;8*E7iu9
+
+literal 0
+HcmV?d00001
+
+diff --git a/src/server.java b/src/server.java
+new file mode 100644
+index 0000000..6904db0
+--- /dev/null
++++ b/src/server.java
+@@ -0,0 +1,163 @@
++import java.io.BufferedReader;
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.io.PrintStream;
++import java.net.InetAddress;
++import java.net.ServerSocket;
++import java.net.Socket;
++import java.net.UnknownHostException;
++import java.util.ArrayList;
++
++
++public class server {
++    static int port;
++    String hostaddress;
++    static ServerSocket serverSocket;
++    static ArrayList<String> clientList = new ArrayList<String>();
++    static ArrayList<PrintStream> writers = new ArrayList<PrintStream>();
++    static Object lock =  new Object();
++
++    static void addClient(String name, PrintStream w) {
++        synchronized(lock) {
++            clientList.add(name);
++            writers.add(w);
++        }
++    }
++
++    static void removeClient(String name, PrintStream w) {
++        synchronized(lock) {
++            clientList.remove(name);
++            writers.remove(w);
++        }
++    }    
++    static boolean containsName(String name) {
++        if (name == null) return false;
++        synchronized(lock) {
++            return clientList.contains(name);
++        }
++    }
++    
++    static ArrayList<PrintStream> getWriterList() {
++        synchronized(lock) {
++            return writers;
++        }
++    }
++    
++    static void printClientList() {
++        synchronized(lock) {
++            System.out.println("list of registered clients:");
++            if (clientList.size() == 0) {
++                System.out.println("empty");
++            } else{
++                for (String name : clientList) {
++                    System.out.println(name);
++                }
++            }
++        }
++    }
++    
++    
++    private static void initPort() {
++        port = 12345;
++    }
++    
++    public static void main(String[] args) {
++        // TODO Auto-generated method stub
++        initPort();
++        //initAddress();
++        try {
++            serverSocket = new ServerSocket(port);
++            System.out.println("server started at port:" + port);
++            System.out.println("server waiting for new connections");
++            // listen for new connections
++            while(true) {
++                new ClientHandler(serverSocket.accept()).start();
++            }
++        } catch (IOException e) {
++            // TODO Auto-generated catch block
++            e.printStackTrace();
++        }finally{
++            System.out.println("Server exiting...");
++            try {
++                serverSocket.close();
++            } catch (IOException e) {
++                // TODO Auto-generated catch block
++                e.printStackTrace();
++            }
++        }
++    }
++
++    public static class ClientHandler extends Thread {
++        Socket clientSocket;
++        String clientUserName;
++        BufferedReader in;
++        PrintStream out;
++        ClientHandler(Socket client) {
++            clientSocket = client;
++            System.out.println("got connection from client <port,addr>:"
++                    + client.getPort() + client.getInetAddress());
++        }
++        public void run() {
++            try {
++                System.out.println("starting run");
++                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
++                out = new PrintStream(clientSocket.getOutputStream(), true);
++                String name;
++                int trials = 50;
++                String s  = "FromServer:SUBMIT_USERNAME:"
++                        + "tries left:" + trials;
++                out.println(s);                    
++                while(trials > 0) {
++                    trials--;
++                    name = in.readLine();
++                    System.out.println("recvd name:" + name);
++                    if (name == null
++                                || name.equals("")
++                                || name.equals(" ")
++                                || containsName(name)) {                            
++                        out.println(s);                        
++                    } else {
++                        addClient(name, out);
++                        clientUserName = name;
++                        printClientList();
++                        out.println("FromServer:NAME_ACCEPTED");
++                        break;
++                    }
++                }
++
++                // accept chats from clients
++                while(clientSocket.isConnected()) {
++                    String line = in.readLine();
++                    System.out.println(line);
++                    if (line == null) {/*TBD*/}
++                    else if (line.contains("EXIT_CLIENT")) {
++                        out.println("GOODBYE!");
++                        break;
++                    } else {
++                        // broadcast to all register clients
++                        ArrayList<PrintStream> l = getWriterList();
++                        for (PrintStream w : l) {
++                            if (w != out) w.println(line);
++                        }
++                    }
++                }
++            } catch (IOException e) {
++                // TODO Auto-generated catch block
++                e.printStackTrace();
++            } finally {
++                try {
++                    removeClient(clientUserName, out);
++                    System.out.println("Client:" 
++                            + clientUserName 
++                            + " removed from chat");
++                    printClientList();
++                    if (in != null) in.close();
++                    if (out != null) out.close();
++                    clientSocket.close();
++                } catch (IOException e) {
++                    System.out.println(e.getMessage());
++                }
++            }
++        }
++    }
++}
+-- 
+1.8.5.2 (Apple Git-48)
+
